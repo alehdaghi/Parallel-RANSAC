@@ -1,0 +1,18 @@
+set(SOURCE
+   ${SOURCE}
+   ${CMAKE_CURRENT_SOURCE_DIR}/segment.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/util.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/matrix.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/normal.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/myintegralimagenormalestimation.cpp
+PARENT_SCOPE
+)
+set(HEADERS
+   ${HEADERS}
+   ${CMAKE_CURRENT_SOURCE_DIR}/segment.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/util.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/type.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/matrix.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/myintegralimagenormalestimation.h
+PARENT_SCOPE
+)
