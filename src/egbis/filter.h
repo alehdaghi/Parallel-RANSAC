@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #include "misc.h"
 #include "convolve.h"
 #include "imconv.h"
-
-#define WIDTH 4.0
+#include <iostream>
+#define WIDTH 10.0
 
 /* normalize mask so it integrates to one */
 static void normalize(std::vector<float> &mask) {
@@ -60,7 +60,14 @@ MAKE_FILTER(fgauss, exp(-0.5*square(i/sigma)));
 /* convolve image with gaussian filter */
 static image<float> *smooth(image<float> *src, float sigma) {
   std::vector<float> mask = make_fgauss(sigma);
+
+  int len = (int)ceil(sigma * WIDTH) + 1;
   normalize(mask);
+  std::cout<<len<<std::endl;
+  for (int i = 0; i < len; i++) {                             \
+    std::cout<<mask[i]<<" ";                                            \
+  }
+  std::cout<<std::endl;
 
   image<float> *tmp = new image<float>(src->height(), src->width(), false);
   image<float> *dst = new image<float>(src->width(), src->height(), false);

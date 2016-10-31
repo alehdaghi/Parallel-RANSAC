@@ -51,17 +51,22 @@ Mat Segmentation::Segment::runEgbisOnMat(Mat *input, float sigma, float k, int m
 	int w = input->cols;
 	int h = input->rows;
 	Mat output(Size(w,h),CV_8UC3);
-	int len = (int)ceil(sigma * WIDTH) + 1;
+    int len = (int)ceil(20) + 1;
 	Mat blur;
-	GaussianBlur( *input, blur, Size( len, len ),sigma,sigma);
-	//imshow("guss",blur);
+    GaussianBlur( *input, blur, Size( len, len ), sigma, 0.0);
+
+    //imshow("img",*input);
+    //imshow("cvGuss",blur);
+
 	// 1. Convert to native format
-	image<rgb> *nativeImage = convertMatToNativeImage(input);
+    image<rgb> *nativeImage = convertMatToNativeImage(&blur);
 	// 2. Run egbis algoritm
 	image<rgb> *segmentetImage = segment_image(nativeImage, sigma, k, min_size, numccs,X,Y);
 	// 3. Convert back to Mat format
 	output = convertNativeToMat(segmentetImage);
 
+    //imshow("guss",output);
+    //waitKey(0);
 	return output;
 }
 

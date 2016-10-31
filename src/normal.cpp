@@ -11,6 +11,8 @@
 #include <iostream>
 #include <pcl/io/pcd_io.h>
 #include <boost/timer/timer.hpp>
+#include <omp.h>
+
 
 #include "util.h"
 #include "myRansac/ParallelRansac.h"
@@ -23,8 +25,8 @@ using namespace std;
 typedef pcl::PointXYZRGB PointType;
 typedef boost::chrono::duration<double> sec;
 
-Utility::Util util;
-Parallel::RANSAC PRansac;
+
+
 
 int32_t num1 = 15;
 class frame{
@@ -33,6 +35,7 @@ class frame{
 	pcl::PointCloud<PointType>::Ptr cloud;
 	Mat rgb,normal,seg;
 	PointType center;
+
 	frame(){
 	}
 	frame(const frame& f):cloud(new pcl::PointCloud<PointType>()),rgb(f.rgb),normal(f.normal),seg(f.seg),center(f.center){
@@ -58,22 +61,22 @@ class frame{
 		{
 			//cout<<planes[i].normal<<" "<<planes[i].d<<endl;
 			
-            cout<<planes[i].normal.x<<" "<<planes[i].normal.y<<" "<<planes[i].normal.z<<
-				" "<<planes[i].d<<" "<<(planes[i].area*planes[i].w)/(double)sum<<endl;
+            //cout<<planes[i].normal.x<<" "<<planes[i].normal.y<<" "<<planes[i].normal.z<<
+                //" "<<planes[i].d<<" "<<(planes[i].area*planes[i].w)/(double)sum<<endl;
 			//cout<<planes[i].Inliers.size()<<endl;
 			//for(int j=0;j<planes[i].Inliers.size();j++)
 				//cout<<planes[i].Inliers[j].x<<" "<<planes[i].Inliers[j].y<<" "<<planes[i].Inliers[j].z<<" ";
 			//cout<<endl;
-            cout<<planes[i].hulls3d.size()<<endl;
-			for(int j=0;j<planes[i].hulls3d.size();j++)
-                cout<<planes[i].hulls3d[j].x<<" "<<planes[i].hulls3d[j].y<<" "<<planes[i].hulls3d[j].z<<" ";
-            cout<<endl;
+            //cout<<planes[i].hulls3d.size()<<endl;
+            //for(int j=0;j<planes[i].hulls3d.size();j++)
+                //cout<<planes[i].hulls3d[j].x<<" "<<planes[i].hulls3d[j].y<<" "<<planes[i].hulls3d[j].z<<" ";
+            //cout<<endl;
 			for(int j=0;j<planes[i].segs.size();j++)
                 segs.at<int8_t>(planes[i].segs[j].x, planes[i].segs[j].y) = 255 - i * 10 - 1;
 		}
-		imwrite(folder+"\\"+file+".png",segs);
-		imwrite(folder+"\\"+file+"n.png",normal);
-		imwrite(folder+"\\"+file+"s.png",seg);
+        imwrite(folder+"/"+file+".png",segs);
+        imwrite(folder+"/"+file+"n.png",normal);
+        imwrite(folder+"/"+file+"s.png",seg);
 	}
 	~frame(){
 		planes.clear();
@@ -87,7 +90,7 @@ void makeFrame(int i,frame& f){
 	ss1<<"D:\\database\\stanford\\copyroom\\depth\\"<<setfill('0') << setw(6)<<i<<".png";
 	stringstream ss2;
 	ss2<<"D:\\database\\stanford\\copyroom\\color\\"<<setfill('0') << setw(6)<<i<<".png";
-
+    Utility::Util util;
 	Mat cap_depth = imread(ss1.str(),CV_LOAD_IMAGE_ANYCOLOR | CV_LOAD_IMAGE_ANYDEPTH);
 	f.rgb = imread(ss2.str(),CV_LOAD_IMAGE_ANYCOLOR);
 	//cout<<ss1.str()<<endl;
@@ -107,14 +110,14 @@ void makeFrameLounge(int i,frame& f){
     ss1<<"/media/mahdi/My/datasets/stanford/Lounge/depth/"<<setfill('0') << setw(6)<<i<<".png";
 	stringstream ss2;
     ss2<<"/media/mahdi/My/datasets/stanford/Lounge/color/"<<setfill('0') << setw(6)<<i<<".png";
-
+    Utility::Util util;
 	Mat cap_depth = imread(ss1.str(),CV_LOAD_IMAGE_ANYCOLOR | CV_LOAD_IMAGE_ANYDEPTH);
 	f.rgb = imread(ss2.str(),CV_LOAD_IMAGE_ANYCOLOR);
 	//cout<<ss1.str()<<endl;
 	//imshow("a",f.rgb);
     f.cloud = util.create_point_cloud_ptr(cap_depth, f.rgb,f.center);
 	//showCloud(*f.cloud);
-	vector<plane> planes;
+    //vector<plane> planes;
 	
     pcl::PointCloud<Normal>::Ptr normal1 = util.segmentPlane(f.cloud,f.normal,f.seg,f.planes);
 
@@ -162,53 +165,44 @@ pcl::PointCloud<PointType> makePlanesCloud(frame f){
 int main(int argc, char* argv[]) {
 	
 	boost::timer::cpu_timer timer1;
-	
-	
-
 	srand(time(NULL));
-	
-    //vector<Utility::Matrix> loungTraj=loung_Trajectory();
-    //vector<Utility::Matrix> kinfuTraj=kinfu_Trajectory();
-    //for(int i=0;i<loungTraj.size();i++)
-    //{
-		//cout<<loungTraj[i]<<endl<<endl;
-    //}
 
-    //pcl::PointCloud<PointType>::Ptr cloud1(new pcl::PointCloud<PointType>),cloud2;
 	timer1.start();
-	//freopen("com.txt","w",stdout);
-    //vector<frame> frames(41);
-	//frames[0]=makeFrame(1);
-	frame f;
+
+    frame f;
     Parallel::RANSAC ransac;
-    for(int i=0;i<99;i+=1){
-		//frames[i]=makeFrame_living_room(i+1);
-		makeFrameLounge(i+1,f);
-		//makeFrame(i+1,f);
-		//makeFrame_living_room_traj3n_frei(i,f);
-		//makeFrame_traj3n_frei_png(i,f);
-		//makeFrame_living_room_traj3n_frei(i,f);
-		//makeFrame_rgbd_dataset_freiburg1_teddy(i,f);
-		stringstream ss;
-		ss<<i;
-        ransac.myRansac(f.planes);
+    makeFrameLounge(1,f);
+    f.save("test","../out/planes");
+#pragma omp parallel private(f,ransac)
+    {
+        for(int i=0;i<96;i+=4)
+        {
+            int id = omp_get_thread_num();
+            int index = (i/4)*4 + id;
 
-        f.save(ss.str(),"../out/planes");
-		//(*cloud1)+=*f.cloud;
-		
-		//(*cloud1)+=makePlanesCloud(f);
-		//showCloud(*f.cloud);
-		//myRansac(frames[i].planes);
-		//showCloud(makePlanesCloud(f));
-		//sort(frames[i].planes.begin(),frames[i].planes.end());
-		//reverse(frames[i].planes.begin(),frames[i].planes.end());
 
-		//frames[i].planes.resize(num);
-		//cout<<"i "<<i<<endl;
-	
-	}
+
+            makeFrameLounge(index+1,f);
+            stringstream ss;
+            ss<<i;
+        #pragma omp critical
+            {
+            boost::timer::cpu_timer timer2;
+            cout<<"id: "<<id<<" i:"<< index <<endl;
+            ransac.myRansac(f.planes);
+            sec seconds = boost::chrono::nanoseconds(timer2.elapsed().user);
+            cout << "time Cuda:" <<seconds.count() << std::endl;
+        }
+
+            f.save(ss.str(),"../out/planes");
+
+        }
+    }
     //showCloud(*cloud1);
+    sec seconds = boost::chrono::nanoseconds(timer1.elapsed().user);
+    cout << "time All:" <<seconds.count() << std::endl;
 	return 0;
+
 //	sec seconds = boost::chrono::nanoseconds(timer1.elapsed().user);
 //	cout << "timeSegment:" <<seconds.count() << std::endl;
 

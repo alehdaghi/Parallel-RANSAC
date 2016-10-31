@@ -17,6 +17,11 @@ SET(CUDA_HOST_COMPILER g++)
 find_package(PCL 1.7 REQUIRED COMPONENTS common io search)
 find_package(Boost 1.5 REQUIRED COMPONENTS system filesystem regex chrono timer )
 find_package(OpenCV REQUIRED )
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 include_directories( ${PCL_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${OpenCV_INCLUDE_DIR})
 
 

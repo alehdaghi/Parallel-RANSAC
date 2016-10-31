@@ -80,9 +80,9 @@ image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
   image<float> *smooth_r = smooth(r, sigma);
   image<float> *smooth_g = smooth(g, sigma);
   image<float> *smooth_b = smooth(b, sigma);
-  delete r;
-  delete g;
-  delete b;
+  //delete r;
+  //delete g;
+  //delete b;
  
   // build graph
   edge *edges = new edge[width*height*4];
@@ -150,7 +150,12 @@ image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
 	  int comp = u->find(y * width + x);
 	  if(!mat[comp])
           mat[comp]=cc++;
-	  imRef(output, x, y) = colors[comp];
+      imRef(output, x, y) = colors[comp];
+//      rgb RGB;
+//      RGB.r = imRef(smooth_r, x, y);
+//      RGB.g = imRef(smooth_g, x, y);
+//      RGB.b = imRef(smooth_b, x, y);
+//      imRef(output, x, y) = RGB;
 
 	  X[mat[comp]].push_back(x);
 	  Y[mat[comp]].push_back(y);

@@ -77,6 +77,7 @@ pcl::PointCloud<pcl::Normal>::Ptr Utility::Util::segmentPlane(pcl::PointCloud<Po
 	meansCloud.width = cloud->width;
 	meansCloud.height = cloud->height;
 	//cout<<"main "<<cloud->width<<endl;
+    cout<<"resize"<<endl;
 	meansCloud.resize(cloud->width*cloud->height);
 
 	boost::timer::cpu_timer timer1;
@@ -99,14 +100,14 @@ pcl::PointCloud<pcl::Normal>::Ptr Utility::Util::segmentPlane(pcl::PointCloud<Po
 	tempImg.convertTo(normalImg,CV_8UC3,255.0);
 	double k=20;
 	blurImg=normalImg.clone();
-	bilateralFilter(normalImg,blurImg,k,k*2,k/2);
+    bilateralFilter(normalImg,blurImg,k,k*2,k/2);
 
 	
   // copies all inliers of the model computed to another PointCloud
 	//pcl::copyPointCloud<PointType>(*cloud, inliers, *final);
 	
 
-	normalImg=blurImg;
+    //normalImg=blurImg;
 
 	//imshow("normal255",normalImg);
 	
